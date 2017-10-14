@@ -3,5 +3,6 @@ package main
 import ("github.com/qinqon/go-blockchain/blockchain")
 
 func main() {
-   blockchain.StartWebServer()
+   bc := blockchain.New()
+   bc.StartWebServer()
 }

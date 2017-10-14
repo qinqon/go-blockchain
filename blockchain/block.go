@@ -7,5 +7,5 @@ type Block struct {
    Timestamp time.Time
    Transactions []Transaction
    Proof int
-   PreviousHash string
+   PreviousHash int
 }

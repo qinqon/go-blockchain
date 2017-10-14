@@ -13,6 +13,8 @@ type Blockchain struct{
 }
 func New() *Blockchain {
    bc := Blockchain{}
+   // Genesis block
+   bc.NewBlock(100, 1)
    return &bc
 }
 
@@ -25,6 +27,10 @@ func Hash(block *Block) string{
    hashedBlock := sha256.Sum256(marshalledBlock)
    hexBlock := hex.EncodeToString(hashedBlock[:])
    return hexBlock
+}
+
+func (b Blockchain) Chain() []*Block {
+   return b.chain
 }
 
 func (b *Blockchain) ValidProof(lastProof, proof int) bool {
@@ -42,7 +48,7 @@ func (b *Blockchain) ProofOfWork(lastProof int) int {
    return proof
 }
 
-func (b *Blockchain) NewBlock(proof int, previousHash string) *Block{
+func (b *Blockchain) NewBlock(proof int, previousHash int) *Block{
    block := Block{
       Index: len(b.chain) + 1,
       Timestamp: time.Time{},
@@ -54,8 +60,8 @@ func (b *Blockchain) NewBlock(proof int, previousHash string) *Block{
    return &block;
 }
 
-func (b *Blockchain) NewTransaction(sender string, recipient string, amount int) int{
-   b.currentTransactions = append(b.currentTransactions, Transaction{sender, recipient, amount})
+func (b *Blockchain) NewTransaction(transaction Transaction) int{
+   b.currentTransactions = append(b.currentTransactions, transaction)
    return b.LastBlock().Index + 1
 }
 
