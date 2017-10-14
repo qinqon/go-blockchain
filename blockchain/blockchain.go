@@ -14,7 +14,8 @@ type Blockchain struct{
 func New() *Blockchain {
    bc := Blockchain{}
    // Genesis block
-   bc.NewBlock(100, 1)
+   bc.currentTransactions = []Transaction{}
+   bc.NewBlockWithPreviousHash(100, "1")
    return &bc
 }
 
@@ -36,19 +37,25 @@ func (b Blockchain) Chain() []*Block {
 func (b *Blockchain) ValidProof(lastProof, proof int) bool {
    guess := []byte(fmt.Sprintf("%i%i", lastProof, proof))
    guessHash := sha256.Sum256(guess)
-   //FIXME: Don't convert to string, compare the slice
-   return string(guessHash[len(guessHash)-4]) == "0000"
+   guessHashEncoded := hex.EncodeToString(guessHash[:])
+   return guessHashEncoded[len(guessHashEncoded)-4:len(guessHashEncoded)] == "0000"
 }
 
 
 func (b *Blockchain) ProofOfWork(lastProof int) int {
    proof := 0
-   for ; b.ValidProof(proof, lastProof); proof++ {
+   for b.ValidProof(proof, lastProof) == false {
+      proof++
    }
    return proof
 }
 
-func (b *Blockchain) NewBlock(proof int, previousHash int) *Block{
+
+func (b *Blockchain) NewBlock(proof int) *Block {
+   return b.NewBlockWithPreviousHash(proof, Hash(b.chain[len(b.chain)-1]))
+}
+
+func (b *Blockchain) NewBlockWithPreviousHash(proof int, previousHash string) *Block{
    block := Block{
       Index: len(b.chain) + 1,
       Timestamp: time.Time{},

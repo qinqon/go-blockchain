@@ -5,11 +5,26 @@ import (
    "net/http"
    "encoding/json"
    "io/ioutil"
+   "github.com/satori/go.uuid"
 )
+
+var node_identifier = uuid.NewV4().String()
 
 
 func (b *Blockchain) mineHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Mine")
+   last_proof := b.LastBlock().Proof
+   proof := b.ProofOfWork(last_proof)
+   b.NewTransaction(Transaction{"0", node_identifier, 1})
+   block := b.NewBlock(proof)
+   w.Header().Add("Content-Type", "application/json")
+   fmt.Fprintf(w, `{
+      "message":"New Block Forged", 
+      "index": %v,
+      "tarnsactions": %v,
+      "proof": %v,
+      "previous_hash": %v,
+   }`, block.Index, block.Transactions, block.Proof, block.PreviousHash)
+
 }
 
 
@@ -37,7 +52,8 @@ func (b *Blockchain) fullChainHandler(w http.ResponseWriter, r *http.Request) {
       http.Error(w, err.Error(), http.StatusInternalServerError)
       return
    }
-   fmt.Fprintf(w, "Full chain %s", string(marshalledChain))
+   w.Header().Add("Content-Type", "application/json")
+   fmt.Fprintf(w, string(marshalledChain))
 }
 
 func (b *Blockchain) StartWebServer() {
