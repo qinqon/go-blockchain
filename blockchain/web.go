@@ -13,7 +13,7 @@ var node_identifier = uuid.NewV4().String()
 
 func (b *Blockchain) mineHandler(w http.ResponseWriter, r *http.Request) {
    last_proof := b.LastBlock().Proof
-   proof := b.ProofOfWork(last_proof)
+   proof := ProofOfWork(last_proof)
    b.NewTransaction(Transaction{"0", node_identifier, 1})
    block := b.NewBlock(proof)
    w.Header().Add("Content-Type", "application/json")

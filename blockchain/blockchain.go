@@ -34,7 +34,7 @@ func (b Blockchain) Chain() []*Block {
    return b.chain
 }
 
-func (b *Blockchain) ValidProof(lastProof, proof int) bool {
+func ValidProof(lastProof, proof int) bool {
    guess := []byte(fmt.Sprintf("%i%i", lastProof, proof))
    guessHash := sha256.Sum256(guess)
    guessHashEncoded := hex.EncodeToString(guessHash[:])
@@ -42,9 +42,9 @@ func (b *Blockchain) ValidProof(lastProof, proof int) bool {
 }
 
 
-func (b *Blockchain) ProofOfWork(lastProof int) int {
+func ProofOfWork(lastProof int) int {
    proof := 0
-   for b.ValidProof(proof, lastProof) == false {
+   for ValidProof(proof, lastProof) == false {
       proof++
    }
    return proof
