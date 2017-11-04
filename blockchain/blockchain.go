@@ -1,13 +1,17 @@
 package blockchain
 
-import "time"
-import "log"
-import "encoding/json"
-import "crypto/sha256"
-import "encoding/hex"
-import "fmt"
+import (
+   "time"
+   "log"
+   "encoding/json"
+   "crypto/sha256"
+   "encoding/hex"
+   "fmt"
+   "net/url"
+)
 
 type Blockchain struct{
+   nodes map[*url.URL]bool
    chain []*Block
    currentTransactions []Transaction
 }
@@ -75,4 +79,26 @@ func (b *Blockchain) NewTransaction(transaction Transaction) int{
 
 func (b *Blockchain) LastBlock() *Block{
    return b.chain[len(b.chain) - 1]
+}
+
+func (b *Blockchain) RegisterNode(address string) {
+   u, err := url.Parse(address)
+   if err  != nil {
+      log.Fatal(err)
+   }
+   b.nodes[u] = true
+}
+
+func ValidChain(chain []*Block) bool {
+   if len(chain) <= 1 {
+      return true
+   }
+   var lastBlock *Block = chain[0]
+   for _, block := range chain[1:len(chain)-1]{
+      if ValidProof(lastBlock.Proof, block.Proof) == false {
+         return false
+      }
+      lastBlock = block
+   }
+   return true
 }
