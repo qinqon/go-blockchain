@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+   "errors"
    "time"
    "log"
    "encoding/json"
@@ -89,16 +90,19 @@ func (b *Blockchain) RegisterNode(address string) {
    b.nodes[u] = true
 }
 
-func ValidChain(chain []*Block) bool {
+func ValidChain(chain []*Block) error {
    if len(chain) <= 1 {
-      return true
+      return nil
    }
    var lastBlock *Block = chain[0]
    for _, block := range chain[1:len(chain)-1]{
-      if ValidProof(lastBlock.Proof, block.Proof) == false {
-         return false
+      if ! ValidProof(lastBlock.Proof, block.Proof) {
+         return errors.New("Invalid proof")
+      }
+      if block.PreviousHash != Hash(lastBlock) {
+         return errors.New("Invalid privious hash")
       }
       lastBlock = block
    }
-   return true
+   return nil
 }
