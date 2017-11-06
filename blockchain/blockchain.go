@@ -40,16 +40,17 @@ func (b Blockchain) Chain() []*Block {
 }
 
 func ValidProof(lastProof, proof int) bool {
-   guess := []byte(fmt.Sprintf("%i%i", lastProof, proof))
-   guessHash := sha256.Sum256(guess)
+   guess := fmt.Sprintf("%v%v", lastProof, proof)
+   guessHash := sha256.Sum256([]byte(guess))
    guessHashEncoded := hex.EncodeToString(guessHash[:])
-   return guessHashEncoded[len(guessHashEncoded)-4:len(guessHashEncoded)] == "0000"
+   isValid := guessHashEncoded[len(guessHashEncoded)-4:len(guessHashEncoded)] == "0000"
+   return isValid
 }
 
 
 func ProofOfWork(lastProof int) int {
    proof := 0
-   for ValidProof(proof, lastProof) == false {
+   for ValidProof(lastProof, proof) == false {
       proof++
    }
    return proof
@@ -90,19 +91,27 @@ func (b *Blockchain) RegisterNode(address string) {
    b.nodes[u] = true
 }
 
+func ValidBlock(blockToCheck *Block, previousBlock *Block) error {
+   if ! ValidProof(previousBlock.Proof, blockToCheck.Proof) {
+      return errors.New("Invalid proof")
+   }
+   if blockToCheck.PreviousHash != Hash(previousBlock) {
+      return errors.New("Invalid privious hash")
+   }
+   return nil
+}
+
 func ValidChain(chain []*Block) error {
    if len(chain) <= 1 {
       return nil
    }
-   var lastBlock *Block = chain[0]
-   for _, block := range chain[1:len(chain)-1]{
-      if ! ValidProof(lastBlock.Proof, block.Proof) {
-         return errors.New("Invalid proof")
+   var previousBlock *Block = chain[0]
+   for _, block := range chain[1:]{
+      err := ValidBlock(block, previousBlock)
+      if err != nil {
+         return err
       }
-      if block.PreviousHash != Hash(lastBlock) {
-         return errors.New("Invalid privious hash")
-      }
-      lastBlock = block
+      previousBlock = block
    }
    return nil
 }
