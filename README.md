@@ -4,4 +4,4 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/qinqon/go-blockchain)](https://goreportcard.com/report/github.com/qinqon/go-blockchain)
 [![GoDoc](https://godoc.org/github.com/qinqon/go-blockchain?status.svg)](https://godoc.org/github.com/qinqon/go-blockchain)
 
-Golang port of the pythong blockchain from [hackernoon](https://hackernoon.com/learn-blockchains-by-building-one-117428612f46)
+Golang port of the python blockchain from [hackernoon](https://hackernoon.com/learn-blockchains-by-building-one-117428612f46)
