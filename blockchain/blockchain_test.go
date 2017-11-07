@@ -7,24 +7,19 @@ import(
 
 func TestInvalidProofReturnsFalse(t *testing.T) {
    lastProof := 33
-   proof := 10033575
-   assert.False(t, ValidProof(lastProof, proof), "33 and 66 as last and current proof is not valid")
+   proof := 66
+   assert.Errorf(t, ValidProof(lastProof, proof), "last proof %v and current proof %v are not valid", lastProof, proof)
 }
 
 func TestValidProofReturnsTrue(t *testing.T) {
    lastProof := 33
    proof := 10033575
-   assert.True(t, ValidProof(lastProof, proof), "")
-}
-
-func TestEmptyChainIsValid(t *testing.T) {
-   var emptyChain []*Block
-   assert.Nil(t, ValidChain(emptyChain), "Invalid chain")
+   assert.Errorf(t, ValidProof(lastProof, proof), "last proof %v and current proof %v are valid", lastProof, proof)
 }
 
 func TestChainWithJustGenesIsBlockIsValid(t *testing.T) {
    blockchain := New()
-   assert.Nil(t, ValidChain(blockchain.Chain()), "Invalid chain")
+   assert.NoError(t, blockchain.Validate(), "Invalid chain")
 }
 
 func TestTwoBlocksChainWithCorrectProofIsValid(t *testing.T) {
@@ -32,7 +27,7 @@ func TestTwoBlocksChainWithCorrectProofIsValid(t *testing.T) {
    lastProof := blockchain.LastBlock().Proof
    proof := ProofOfWork(lastProof)
    blockchain.NewBlock(proof)
-   assert.Nil(t, ValidChain(blockchain.Chain()), "Invalid chain")
+   assert.NoError(t, blockchain.Validate(), "Invalid chain")
 }
 
 func TestTwoBlocksChainWithWrongProofIsInvalid(t *testing.T) {
@@ -41,6 +36,17 @@ func TestTwoBlocksChainWithWrongProofIsInvalid(t *testing.T) {
 
    // Bad proof
    blockchain.NewBlock(lastProof)
+   assert.NotNil(t, blockchain.Validate(), "Unexpected valid chain")
+}
 
-   assert.NotNil(t, ValidChain(blockchain.Chain()), "Unexpected valid chain")
+func TestAlteringIndexInvalidatesChain(t *testing.T) {
+   blockchain := New()
+   lastProof := blockchain.LastBlock().Proof
+   proof := ProofOfWork(lastProof)
+   blockchain.NewBlock(proof)
+
+   // Alter the previous index block
+   blockchain.Chain()[0].Index = 666
+
+   assert.NotNil(t, blockchain.Validate(), "Unexpected valid chain")
 }
