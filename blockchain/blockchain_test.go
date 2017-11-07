@@ -36,7 +36,7 @@ func TestTwoBlocksChainWithWrongProofIsInvalid(t *testing.T) {
 
 	// Bad proof
 	blockchain.NewBlock(lastProof)
-	assert.NotNil(t, blockchain.Validate(), "Unexpected valid chain")
+	assert.Error(t, blockchain.Validate(), "Unexpected valid chain")
 }
 
 func TestAlteringIndexInvalidatesChain(t *testing.T) {
@@ -48,5 +48,24 @@ func TestAlteringIndexInvalidatesChain(t *testing.T) {
 	// Alter the previous index block
 	blockchain.Chain()[0].Index = 666
 
-	assert.NotNil(t, blockchain.Validate(), "Unexpected valid chain")
+	assert.Error(t, blockchain.Validate(), "Unexpected valid chain")
+}
+
+func TestAlteringTransactionInvalidatesChain(t *testing.T) {
+	blockchain := New()
+	proof := blockchain.LastBlock().Proof
+
+	// Add a transaction
+	blockchain.NewTransaction(Transaction{Sender: "qinqon", Recipient: "golang", Amount: 99999})
+
+	proof = ProofOfWork(proof)
+	blockchain.NewBlock(proof)
+
+	proof = ProofOfWork(proof)
+	blockchain.NewBlock(proof)
+
+	// Alter the transaction
+	blockchain.Chain()[1].Transactions[0].Recipient = "Bad guy"
+
+	assert.Error(t, blockchain.Validate(), "Unexpected valid chain")
 }
