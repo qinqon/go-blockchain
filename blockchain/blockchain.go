@@ -53,14 +53,6 @@ func (b *Blockchain) LastBlock() *Block {
 	return b.chain[len(b.chain)-1]
 }
 
-func (b *Blockchain) RegisterNode(address string) {
-	u, err := url.Parse(address)
-	if err != nil {
-		log.Fatal(err)
-	}
-	b.nodes[u] = true
-}
-
 func (b *Blockchain) Validate() error {
 	if len(b.Chain()) <= 1 {
 		return nil
@@ -73,4 +65,22 @@ func (b *Blockchain) Validate() error {
 		previousBlock = block
 	}
 	return nil
+}
+
+func (b *Blockchain) RegisterNode(address string) error {
+	u, err := url.Parse(address)
+	if err != nil {
+		return err
+	}
+	b.nodes[u] = true
+	return nil
+}
+
+func (b *Blockchain) ResolveConflict(newBlockchain *Blockchain) {
+	if len(newBlockchain.Chain()) < len(b.chain) {
+		return
+	}
+	if err := newBlockchain.Validate(); err == nil {
+		b.chain = newBlockchain.chain
+	}
 }

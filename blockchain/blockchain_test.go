@@ -69,3 +69,69 @@ func TestAlteringTransactionInvalidatesChain(t *testing.T) {
 
 	assert.Error(t, blockchain.Validate(), "Unexpected valid chain")
 }
+
+func TestNoConflictsWithSmallerBlockchain(t *testing.T) {
+	blockchain := New()
+	proof := blockchain.LastBlock().Proof
+
+	proof = ProofOfWork(proof)
+	blockchain.NewBlock(proof)
+
+	proof = ProofOfWork(proof)
+	blockchain.NewBlock(proof)
+
+	conflictingBlockchain := New()
+	proof = conflictingBlockchain.LastBlock().Proof
+
+	proof = ProofOfWork(proof)
+	conflictingBlockchain.NewBlock(proof)
+
+	expectedChain := blockchain.Chain()
+
+	blockchain.ResolveConflict(conflictingBlockchain)
+	assert.Equal(t, expectedChain, blockchain.Chain())
+}
+
+func TestReplaceConflictResolutionWithBiggerBlockchain(t *testing.T) {
+	blockchain := New()
+	proof := blockchain.LastBlock().Proof
+
+	proof = ProofOfWork(proof)
+	blockchain.NewBlock(proof)
+
+	conflictingBlockchain := New()
+	proof = conflictingBlockchain.LastBlock().Proof
+
+	proof = ProofOfWork(proof)
+	conflictingBlockchain.NewBlock(proof)
+
+	proof = ProofOfWork(proof)
+	conflictingBlockchain.NewBlock(proof)
+
+	expectedChain := conflictingBlockchain.Chain()
+
+	blockchain.ResolveConflict(conflictingBlockchain)
+	assert.Equal(t, expectedChain, blockchain.Chain())
+}
+
+func TestNoConflictWithInvalidBlockchain(t *testing.T) {
+	blockchain := New()
+	proof := blockchain.LastBlock().Proof
+	proof = ProofOfWork(proof)
+	blockchain.NewBlock(proof)
+
+	conflictingBlockchain := New()
+	proof = conflictingBlockchain.LastBlock().Proof
+	proof = ProofOfWork(proof)
+	conflictingBlockchain.NewBlock(proof)
+	proof = ProofOfWork(proof)
+	conflictingBlockchain.NewBlock(proof)
+
+	// Alter the previous index block
+	conflictingBlockchain.Chain()[0].Index = 666
+
+	expectedChain := blockchain.Chain()
+
+	blockchain.ResolveConflict(conflictingBlockchain)
+	assert.Equal(t, expectedChain, blockchain.Chain())
+}
