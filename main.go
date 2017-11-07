@@ -1,8 +1,10 @@
 package main
 
-import ("github.com/qinqon/go-blockchain/blockchain")
+import (
+	"github.com/qinqon/go-blockchain/blockchain"
+)
 
 func main() {
-   bc := blockchain.New()
-   bc.StartWebServer()
+	bc := blockchain.New()
+	bc.StartWebServer()
 }
