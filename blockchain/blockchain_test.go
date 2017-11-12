@@ -88,7 +88,7 @@ func TestNoConflictsWithSmallerBlockchain(t *testing.T) {
 
 	expectedChain := blockchain.Chain()
 
-	blockchain.ResolveConflict(conflictingBlockchain)
+	blockchain.ResolveConflict(conflictingBlockchain.Chain())
 	assert.Equal(t, expectedChain, blockchain.Chain())
 }
 
@@ -110,7 +110,7 @@ func TestReplaceConflictResolutionWithBiggerBlockchain(t *testing.T) {
 
 	expectedChain := conflictingBlockchain.Chain()
 
-	blockchain.ResolveConflict(conflictingBlockchain)
+	blockchain.ResolveConflict(conflictingBlockchain.Chain())
 	assert.Equal(t, expectedChain, blockchain.Chain())
 }
 
@@ -132,6 +132,6 @@ func TestNoConflictWithInvalidBlockchain(t *testing.T) {
 
 	expectedChain := blockchain.Chain()
 
-	blockchain.ResolveConflict(conflictingBlockchain)
+	blockchain.ResolveConflict(conflictingBlockchain.Chain())
 	assert.Equal(t, expectedChain, blockchain.Chain())
 }

@@ -2,12 +2,10 @@ package blockchain
 
 import (
 	"log"
-	"net/url"
 	"time"
 )
 
 type Blockchain struct {
-	nodes               map[*url.URL]bool
 	chain               []*Block
 	currentTransactions []Transaction
 }
@@ -53,12 +51,12 @@ func (b *Blockchain) LastBlock() *Block {
 	return b.chain[len(b.chain)-1]
 }
 
-func (b *Blockchain) Validate() error {
-	if len(b.Chain()) <= 1 {
+func ValidateChain(chain []*Block) error {
+	if len(chain) <= 1 {
 		return nil
 	}
-	var previousBlock *Block = b.Chain()[0]
-	for _, block := range b.Chain()[1:] {
+	var previousBlock *Block = chain[0]
+	for _, block := range chain[1:] {
 		if err := block.Validate(previousBlock); err != nil {
 			return err
 		}
@@ -67,20 +65,15 @@ func (b *Blockchain) Validate() error {
 	return nil
 }
 
-func (b *Blockchain) RegisterNode(address string) error {
-	u, err := url.Parse(address)
-	if err != nil {
-		return err
-	}
-	b.nodes[u] = true
-	return nil
+func (b *Blockchain) Validate() error {
+	return ValidateChain(b.Chain())
 }
 
-func (b *Blockchain) ResolveConflict(newBlockchain *Blockchain) {
-	if len(newBlockchain.Chain()) < len(b.chain) {
+func (b *Blockchain) ResolveConflict(newChain []*Block) {
+	if len(newChain) < len(b.chain) {
 		return
 	}
-	if err := newBlockchain.Validate(); err == nil {
-		b.chain = newBlockchain.chain
+	if err := ValidateChain(newChain); err == nil {
+		b.chain = newChain
 	}
 }

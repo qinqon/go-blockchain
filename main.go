@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	bc := blockchain.New()
-	bc.StartWebServer()
+	node := blockchain.NewNode()
+	node.Start(":5000")
 }
