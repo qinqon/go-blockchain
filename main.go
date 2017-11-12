@@ -2,9 +2,19 @@ package main
 
 import (
 	"github.com/qinqon/go-blockchain/blockchain"
+	"log"
+	"os"
 )
 
 func main() {
-	node := blockchain.NewNode()
-	node.Start(":5000")
+	address := ":5000"
+	if len(os.Args) >= 2 {
+		address = os.Args[1]
+	}
+	node := blockchain.NewNode(address)
+
+	log.Printf("Starting blockchain node at %v", address)
+	if err := node.HttpServer().ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
 }
