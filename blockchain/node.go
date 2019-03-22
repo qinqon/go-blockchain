@@ -17,8 +17,12 @@ type Node struct {
 }
 
 func NewNode(address string) *Node {
+	u, err := uuid.NewV4()
+	if err != nil {
+		return nil
+	}
 	node := Node{
-		identifier: uuid.NewV4().String(),
+		identifier: u.String(),
 	}
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/mine", node.mineHandler)
