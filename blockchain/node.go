@@ -11,7 +11,7 @@ import (
 
 type Node struct {
 	neighbours map[*url.URL]bool
-	blockchain Blockchain
+	blockchain *Blockchain
 	identifier string
 	httpServer *http.Server
 }
@@ -28,6 +28,7 @@ func NewNode(address string) *Node {
 		Addr:    address,
 		Handler: serveMux,
 	}
+	node.blockchain = NewBlockchain()
 	return &node
 }
 

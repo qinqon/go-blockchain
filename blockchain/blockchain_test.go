@@ -18,12 +18,12 @@ func TestValidProofReturnsTrue(t *testing.T) {
 }
 
 func TestChainWithJustGenesIsBlockIsValid(t *testing.T) {
-	blockchain := New()
+	blockchain := NewBlockchain()
 	assert.NoError(t, blockchain.Validate(), "Invalid chain")
 }
 
 func TestTwoBlocksChainWithCorrectProofIsValid(t *testing.T) {
-	blockchain := New()
+	blockchain := NewBlockchain()
 	lastProof := blockchain.LastBlock().Proof
 	proof := ProofOfWork(lastProof)
 	blockchain.NewBlock(proof)
@@ -31,7 +31,7 @@ func TestTwoBlocksChainWithCorrectProofIsValid(t *testing.T) {
 }
 
 func TestTwoBlocksChainWithWrongProofIsInvalid(t *testing.T) {
-	blockchain := New()
+	blockchain := NewBlockchain()
 	lastProof := blockchain.LastBlock().Proof
 
 	// Bad proof
@@ -40,7 +40,7 @@ func TestTwoBlocksChainWithWrongProofIsInvalid(t *testing.T) {
 }
 
 func TestAlteringIndexInvalidatesChain(t *testing.T) {
-	blockchain := New()
+	blockchain := NewBlockchain()
 	lastProof := blockchain.LastBlock().Proof
 	proof := ProofOfWork(lastProof)
 	blockchain.NewBlock(proof)
@@ -52,7 +52,7 @@ func TestAlteringIndexInvalidatesChain(t *testing.T) {
 }
 
 func TestAlteringTransactionInvalidatesChain(t *testing.T) {
-	blockchain := New()
+	blockchain := NewBlockchain()
 	proof := blockchain.LastBlock().Proof
 
 	// Add a transaction
@@ -71,7 +71,7 @@ func TestAlteringTransactionInvalidatesChain(t *testing.T) {
 }
 
 func TestNoConflictsWithSmallerBlockchain(t *testing.T) {
-	blockchain := New()
+	blockchain := NewBlockchain()
 	proof := blockchain.LastBlock().Proof
 
 	proof = ProofOfWork(proof)
@@ -80,7 +80,7 @@ func TestNoConflictsWithSmallerBlockchain(t *testing.T) {
 	proof = ProofOfWork(proof)
 	blockchain.NewBlock(proof)
 
-	conflictingBlockchain := New()
+	conflictingBlockchain := NewBlockchain()
 	proof = conflictingBlockchain.LastBlock().Proof
 
 	proof = ProofOfWork(proof)
@@ -93,13 +93,13 @@ func TestNoConflictsWithSmallerBlockchain(t *testing.T) {
 }
 
 func TestReplaceConflictResolutionWithBiggerBlockchain(t *testing.T) {
-	blockchain := New()
+	blockchain := NewBlockchain()
 	proof := blockchain.LastBlock().Proof
 
 	proof = ProofOfWork(proof)
 	blockchain.NewBlock(proof)
 
-	conflictingBlockchain := New()
+	conflictingBlockchain := NewBlockchain()
 	proof = conflictingBlockchain.LastBlock().Proof
 
 	proof = ProofOfWork(proof)
@@ -115,12 +115,12 @@ func TestReplaceConflictResolutionWithBiggerBlockchain(t *testing.T) {
 }
 
 func TestNoConflictWithInvalidBlockchain(t *testing.T) {
-	blockchain := New()
+	blockchain := NewBlockchain()
 	proof := blockchain.LastBlock().Proof
 	proof = ProofOfWork(proof)
 	blockchain.NewBlock(proof)
 
-	conflictingBlockchain := New()
+	conflictingBlockchain := NewBlockchain()
 	proof = conflictingBlockchain.LastBlock().Proof
 	proof = ProofOfWork(proof)
 	conflictingBlockchain.NewBlock(proof)

@@ -10,7 +10,7 @@ type Blockchain struct {
 	currentTransactions []Transaction
 }
 
-func New() *Blockchain {
+func NewBlockchain() *Blockchain {
 	bc := Blockchain{}
 	// Genesis block
 	bc.currentTransactions = []Transaction{}
