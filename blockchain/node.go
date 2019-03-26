@@ -24,6 +24,8 @@ func NewNode(address string) *Node {
 	serveMux.HandleFunc("/mine", node.mineHandler)
 	serveMux.HandleFunc("/transaction/new", node.newTransactionHandler)
 	serveMux.HandleFunc("/chain", node.fullChainHandler)
+	serveMux.HandleFunc("/neighbour", node.registerNeighbourHandler)
+	serveMux.HandleFunc("/resolve", node.resolveConflictsHandler)
 	node.httpServer = &http.Server{
 		Addr:    address,
 		Handler: serveMux,
@@ -41,7 +43,8 @@ func (n *Node) RegisterNeighbour(address string) error {
 	return nil
 }
 
-func (n *Node) ResolveConflicts() {
+func (n *Node) ResolveConflicts() bool {
+	chainChanged := false
 	for neighbour := range n.neighbours {
 		resp, err := http.Get("http://" + neighbour.String() + "/chain")
 		if err != nil {
@@ -53,8 +56,11 @@ func (n *Node) ResolveConflicts() {
 		if err = json.NewDecoder(resp.Body).Decode(neighbourChain); err != nil {
 			continue
 		}
-		n.blockchain.ResolveConflict(neighbourChain)
+		if n.blockchain.ResolveConflict(neighbourChain) {
+			chainChanged = true
+		}
 	}
+	return chainChanged
 }
 
 func (n *Node) mineHandler(w http.ResponseWriter, r *http.Request) {
@@ -101,6 +107,36 @@ func (n *Node) fullChainHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(marshalledChain))
 }
 
+func (n *Node) registerNeighbourHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	nodes := Nodes{}
+	err = json.Unmarshal(body, &nodes)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, node := range nodes.Nodes {
+		n.RegisterNeighbour(node)
+	}
+	w.Header().Add("Content-Type", "application/json")
+	fmt.Fprintf(w, `{"message":"neighbours added"}`)
+}
+
+func (n *Node) resolveConflictsHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	chainReplaced := n.ResolveConflicts()
+	w.Header().Add("Content-Type", "application/json")
+	if chainReplaced {
+		fmt.Fprintf(w, `{"message":"chain replaced"}`)
+	} else {
+		fmt.Fprintf(w, `{"message":"chain maintened"}`)
+	}
+}
 func (n *Node) HttpServer() *http.Server {
 	return n.httpServer
 }

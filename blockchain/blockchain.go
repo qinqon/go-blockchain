@@ -69,11 +69,13 @@ func (b *Blockchain) Validate() error {
 	return ValidateChain(b.Chain())
 }
 
-func (b *Blockchain) ResolveConflict(newChain []*Block) {
+func (b *Blockchain) ResolveConflict(newChain []*Block) bool {
 	if len(newChain) < len(b.chain) {
-		return
+		return false
 	}
 	if err := ValidateChain(newChain); err == nil {
 		b.chain = newChain
+		return true
 	}
+	return false
 }
