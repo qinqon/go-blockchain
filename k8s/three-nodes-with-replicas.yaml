@@ -41,7 +41,6 @@ spec:
       containers:
       - name: go-blockchain-node-2
         image: quiquell/go-blockchain:latest
-        imagePullPolicy: Always
         ports:
         - containerPort: 5000
 ---

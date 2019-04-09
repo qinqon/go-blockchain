@@ -31,6 +31,7 @@ func NewNode(address string) *Node {
 		Handler: serveMux,
 	}
 	node.blockchain = NewBlockchain()
+	node.neighbours = make(map[*url.URL]bool)
 	return &node
 }
 
