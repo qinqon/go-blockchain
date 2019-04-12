@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -33,6 +34,14 @@ func NewNode(address string) *Node {
 	node.blockchain = NewBlockchain()
 	node.neighbours = make(map[*url.URL]bool)
 	return &node
+}
+
+func (node *Node) Start(address string) error {
+	log.Printf("Starting blockchain node at %v", address)
+	if err := node.HttpServer().ListenAndServe(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (n *Node) RegisterNeighbour(address string) error {

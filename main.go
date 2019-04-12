@@ -13,8 +13,7 @@ func main() {
 	}
 	node := blockchain.NewNode(address)
 
-	log.Printf("Starting blockchain node at %v", address)
-	if err := node.HttpServer().ListenAndServe(); err != nil {
+	if err := node.Start(address); err != nil {
 		log.Fatal(err)
 	}
 }
